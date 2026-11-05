@@ -413,6 +413,76 @@
   <li>利用人数と権限の分け方（他の人の案件を見てよいか）、既存データの移行の有無</li>
 </ol>
 
+<h2>10. 参考：将来の追加機能で比べる React と Thymeleaf＋JavaScript</h2>
+<p>現時点の方針は <strong>Thymeleaf＋Bootstrap＋JavaScript</strong>（8章）。この章は、今後機能が増えたときに React を選ぶとどんな利点があるかを整理した<strong>判断材料</strong>です。</p>
+
+<h3>10.1 前提：処理の流れの違い</h3>
+<table>
+  <tr><th style="width:20%">観点</th><th>Thymeleaf＋JavaScript</th><th>React（＋Spring Boot API）</th></tr>
+  <tr><td>HTMLを作る場所</td><td>サーバー（Java）が完成したHTMLを返す</td><td>ブラウザ（JavaScript）がJSONから画面を組み立てる</td></tr>
+  <tr><td>画面の更新</td><td>基本はページ単位で再読み込み。部分更新は fetch で自前実装</td><td>変わった部分だけ自動で書き換わる</td></tr>
+  <tr><td>画面の状態管理</td><td>DOMを直接操作。画面が複雑になるほど「どこで何を書き換えたか」が追いにくい</td><td>「データ（state）が変われば画面が変わる」仕組み。複雑な画面でも整理しやすい</td></tr>
+  <tr><td>部品の再利用</td><td>Thymeleafのフラグメント（th:replace）で共通化。動きは別のJSに書く</td><td>見た目と動きを1つのコンポーネントにまとめて使い回せる</td></tr>
+  <tr><td>ライブラリ</td><td>素のJS（バニラJS）向けのものを組み合わせる。数は多いが、つなぎ込みは自前</td><td>React専用の部品が非常に多い。組み合わせ方の情報も多い</td></tr>
+</table>
+
+<h3>10.2 追加機能ごとの比較</h3>
+<p class="note">「差」：◎ React が大きく有利／○ React がやや有利／＝ ほぼ同じ（主にサーバー側の仕事）</p>
+<table>
+  <tr><th style="width:16%">追加機能</th><th>Thymeleaf＋JSでの実現</th><th>Reactでの実現</th><th>Reactにするメリット</th><th style="width:6%">差</th></tr>
+  <tr><td>カレンダー表示</td><td>FullCalendar（素のJS版）を読み込み、予定をJSONで渡す</td><td>FullCalendar（React版）、react-big-calendar など</td><td>予定の追加・ドラッグ移動のあと、一覧やダッシュボードの数字も自動で更新される。カレンダーとフォームの連動が書きやすい</td><td>○</td></tr>
+  <tr><td>案件カンバン（ステータスをドラッグで変更）</td><td>SortableJS でドラッグ＋fetch で保存。列の件数などは自前で書き換え</td><td>dnd-kit など</td><td>ドラッグ後に件数・金額・カードの表示がまとめて正しく更新される。失敗時に元へ戻す処理も書きやすい</td><td>◎</td></tr>
+  <tr><td>チャット（リアルタイム）</td><td>WebSocket（STOMP）で受信し、DOMにメッセージを追加する処理を自前で書く</td><td>同じWebSocket＋チャットUI部品</td><td>新着メッセージ・未読バッジ・入力中表示などを、別々の画面部品へ一貫して反映できる</td><td>◎</td></tr>
+  <tr><td>通知・未読バッジの即時更新</td><td>定期的に fetch して数字を書き換える</td><td>TanStack Query などで定期取得・自動更新</td><td>ヘッダー・ダッシュボード・一覧など複数の場所のバッジが同じデータから自動で揃う</td><td>○</td></tr>
+  <tr><td>@メンション入力</td><td>Tribute.js などで候補を表示</td><td>Tiptap、react-mentions など</td><td>候補の絞り込み・選択・通知先の保持を部品にまとめやすい</td><td>○</td></tr>
+  <tr><td>高機能な表（並べ替え・絞り込み・列固定・大量データ）</td><td>DataTables、Tabulator など</td><td>TanStack Table、AG Grid など</td><td>絞り込み条件をURLや他の部品と連動させやすい。表の中で直接編集する機能も作りやすい</td><td>○</td></tr>
+  <tr><td>ダッシュボードのグラフ</td><td>Chart.js</td><td>Recharts、Chart.js（React版）など</td><td>グラフをクリック → 下の一覧が絞り込まれる、といった連動が書きやすい</td><td>○</td></tr>
+  <tr><td>日付・時刻の入力</td><td>ブラウザ標準の date 入力、flatpickr など</td><td>react-day-picker、MUI の DatePicker など</td><td>見た目を揃えた部品がそろっている。ただし標準入力でも実用上は十分</td><td>＝</td></tr>
+  <tr><td>顧客名の候補表示（オートコンプリート）</td><td>Tom Select など</td><td>React Select、shadcn/ui の Combobox など</td><td>選んだ顧客に応じて案件の選択肢を切り替える、といった連動が簡単</td><td>○</td></tr>
+  <tr><td>入力フォームのチェック・自動保存</td><td>HTML標準のチェック＋サーバー側の検証。自動保存は自前</td><td>React Hook Form＋Zod など</td><td>入力中にその場でエラーを出す、下書きを自動保存する、入力に応じて項目を出し分けるのが楽</td><td>○</td></tr>
+  <tr><td>ファイルのドラッグ＆ドロップ</td><td>Dropzone.js など</td><td>react-dropzone など</td><td>アップロードの進み具合・プレビュー・失敗時の再送を画面に出しやすい</td><td>○</td></tr>
+  <tr><td>地図表示（顧客の所在地）</td><td>Leaflet</td><td>react-leaflet</td><td>地図と顧客一覧の連動（地図で選ぶ → 一覧が絞られる）が書きやすい</td><td>○</td></tr>
+  <tr><td>スケジュール・ガントチャート</td><td>Frappe Gantt など</td><td>専用ライブラリ多数</td><td>選べる部品が多い</td><td>○</td></tr>
+  <tr><td>モーダル・トースト・タブなどUI部品</td><td>Bootstrap のJS部品</td><td>shadcn/ui、MUI など</td><td>見た目と動きをまとめた部品を使い回せる。デザインを揃えやすい</td><td>○</td></tr>
+  <tr><td>オフライン入力（電波のない場所で入力し、あとで送信）</td><td>Service Worker を自前で実装。難度は高い</td><td>PWA構成＋状態管理のライブラリ</td><td>オフライン時の一時保存と再送の仕組みを組み込みやすい</td><td>◎</td></tr>
+  <tr><td>スマホアプリ化</td><td>Webのまま（ホーム画面への追加まで）</td><td>React Native で、考え方や一部のロジックを流用できる</td><td>将来ネイティブアプリにする場合の土台になる</td><td>◎</td></tr>
+  <tr><td>外部カレンダー連携（Google／Outlook）</td><td colspan="2">サーバー側（Java）でAPI連携。画面の作りはほぼ関係ない</td><td>差はほとんどない</td><td>＝</td></tr>
+  <tr><td>CSV出力・取り込み</td><td colspan="2">サーバー側の処理が中心</td><td>取り込み前のプレビュー・エラー表示はReactのほうが作りやすい</td><td>＝</td></tr>
+  <tr><td>帳票・PDF出力</td><td colspan="2">サーバー側の処理が中心（Thymeleafのテンプレートを流用できる分、こちらがやや有利）</td><td>なし</td><td>＝</td></tr>
+  <tr><td>権限による表示の出し分け</td><td>Spring Security＋Thymeleafの sec:authorize で簡単に書ける</td><td>APIで権限情報を受け取り、画面側でも制御する（サーバー側のチェックも必須）</td><td>なし。Thymeleafのほうが簡単</td><td>＝</td></tr>
+</table>
+
+<h3>10.3 まとめ：React のメリットとデメリット</h3>
+<table>
+  <tr><th style="width:50%">メリット</th><th>デメリット</th></tr>
+  <tr><td>
+    <ul>
+      <li>カレンダー、カンバン、チャットなど<strong>動きの多い画面</strong>を作りやすい</li>
+      <li>画面の一部だけが書き換わるので、操作がサクサクする</li>
+      <li>部品（コンポーネント）として見た目と動きを使い回せる</li>
+      <li>ライブラリと情報（記事・サンプル）が非常に多い</li>
+      <li>オフライン対応・スマホアプリ化など、将来の拡張に強い</li>
+      <li>フロントとサーバーが分かれるので、APIを他のシステムからも使える</li>
+    </ul>
+  </td><td>
+    <ul>
+      <li><strong>React を書ける人しか画面を直せない</strong>（属人化のリスク）</li>
+      <li>フロントとAPIの2つを作るので、<strong>工数が増える</strong>（目安：MVPで＋1〜1.5人月。要確認）</li>
+      <li>API用の認証（CSRF／CORS など）を別に設計する必要がある</li>
+      <li>Node.js・npm のビルド環境とライブラリの更新管理が増える</li>
+      <li>既存の「対応管理」と構成が揃わない</li>
+      <li>今の機能（登録・一覧・ダッシュボード）だけなら、Thymeleafでも十分に作れる</li>
+    </ul>
+  </td></tr>
+</table>
+
+<h3>10.4 判断の目安</h3>
+<ul>
+  <li><strong>Thymeleafのままでよい</strong>：機能が登録・一覧・ダッシュボード・アラート中心で、保守をチームの誰でもできるようにしたい場合（＝現時点の方針）。</li>
+  <li><strong>Reactを検討する</strong>：カンバン・リアルタイムチャット・オフライン入力・スマホアプリ化のうち<strong>複数を本気でやる</strong>ことになり、かつ<strong>Reactを書けるメンバーが2人以上</strong>いる場合。</li>
+  <li><strong>途中から切り替えることもできる</strong>：最初はThymeleafで作り、サーバー側の処理（Service層）を画面と分けておけば、あとからAPIを足して特定の画面だけReactにする、という段階的な移行が可能。</li>
+</ul>
+
 <div class="warn">打ち合わせ内で表現が食い違っていた点：初期の打ち合わせでは「活動記録は案件に紐付ける」、手書きメモでは「案件なしでも保存できる」となっていたため、本メモでは<strong>後者（案件は任意）</strong>で統一しています。</div>
 
 <p class="note">※文字起こし・手書きメモから整理したものです。聞き取りに自信のない箇所は「要確認」「要ヒアリング」としています。</p>
