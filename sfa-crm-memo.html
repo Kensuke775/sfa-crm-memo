@@ -55,7 +55,8 @@
   .slider { border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
   /* 全スライドを同じセルに重ね、一番高いスライドに枠の高さを合わせる → ボタン位置が動かない */
   .slides { display: grid; }
-  .slide { grid-area: 1 / 1; visibility: hidden; }
+  /* min-width:0 がないとグリッドの子が画面イメージ（640px）まで広がり、ページ全体が横にはみ出す */
+  .slide { grid-area: 1 / 1; visibility: hidden; min-width: 0; }
   .slide.active { visibility: visible; }
   .slide-title { font-weight: 700; margin-bottom: 8px; }
   .slide-caption { color: var(--muted); font-size: 12px; margin-top: 8px; }
@@ -64,7 +65,15 @@
   .dots { display: flex; gap: 6px; }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); border: none; padding: 0; cursor: pointer; }
   .dot.active { background: var(--accent); }
-  .mk-scroll { overflow-x: auto; }
+  .mk-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scroll-hint { display: none; color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+  .mk td:first-child { font-weight: normal; white-space: nowrap; }
+  @media (max-width: 700px) {
+    .slider { padding: 8px; }
+    .scroll-hint { display: block; }
+    .slider-controls button { padding: 8px 18px; font-size: 16px; } /* 指で押しやすく */
+    .dot { width: 12px; height: 12px; }
+  }
   .mk { min-width: 640px; background: #f5f7fa; color: #222; border: 1px solid #cbd2d9; border-radius: 6px; overflow: hidden; font-size: 12px; line-height: 1.5; }
   .mk-nav { background: #2c5282; color: #fff; display: flex; gap: 16px; align-items: center; padding: 8px 12px; }
   .mk-nav b { margin-right: 12px; }
@@ -188,6 +197,7 @@
   <!-- 1. ダッシュボード -->
   <div class="slide active">
     <div class="slide-title">1 / 5　ダッシュボード（PC）</div>
+    <div class="scroll-hint">← 画面イメージは横にスクロールできます →</div>
     <div class="mk-scroll"><div class="mk">
       <div class="mk-nav"><b>営業管理</b><span>ダッシュボード</span><span>顧客</span><span>案件</span><span>活動記録</span><span class="sp">🔔<sup>3</sup>　山田 ▼</span></div>
       <div class="mk-body">
@@ -234,6 +244,7 @@
   <!-- 2. 顧客一覧 -->
   <div class="slide">
     <div class="slide-title">2 / 5　顧客一覧（PC）</div>
+    <div class="scroll-hint">← 画面イメージは横にスクロールできます →</div>
     <div class="mk-scroll"><div class="mk">
       <div class="mk-nav"><b>営業管理</b><span>ダッシュボード</span><span><u>顧客</u></span><span>案件</span><span>活動記録</span><span class="sp">🔔　山田 ▼</span></div>
       <div class="mk-body">
@@ -260,6 +271,7 @@
   <!-- 3. 案件詳細 -->
   <div class="slide">
     <div class="slide-title">3 / 5　案件詳細（PC）</div>
+    <div class="scroll-hint">← 画面イメージは横にスクロールできます →</div>
     <div class="mk-scroll"><div class="mk">
       <div class="mk-nav"><b>営業管理</b><span>ダッシュボード</span><span>顧客</span><span><u>案件</u></span><span>活動記録</span><span class="sp">🔔　山田 ▼</span></div>
       <div class="mk-body">
